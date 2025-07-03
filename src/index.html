@@ -1,32 +1,168 @@
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <link rel="stylesheet" href="styles.css" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>PakePlus App</title>
-        <script type="module" src="/main.js" defer></script>
-    </head>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>抽题</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-top: 60px;
+            padding-bottom: 60px;
+        }
+        #container {
+            background: #fff;
+            margin: 0 auto;
+            padding: 64px 48px 48px 48px;
+            border-radius: 28px;
+            box-shadow: 0 12px 48px rgba(52, 152, 219, 0.22), 0 2px 12px rgba(0,0,0,0.10);
+            width: 100%;
+            max-width: 800px;
+        }
+        h2 {
+            font-size: 3em;
+            font-weight: 900;
+            color: #217dbb;
+            margin-bottom: 44px;
+            letter-spacing: 2px;
+            text-align: center;
+        }
+        #question {
+            font-size: 1.7em;
+            margin: 38px 0 28px 0;
+            min-height: 80px;
+            background: #f4faff;
+            border: 2.5px solid #d0e6fa;
+            border-radius: 14px;
+            padding: 38px 28px;
+            color: #333;
+            box-shadow: 0 2px 12px rgba(52,152,219,0.10);
+            transition: background 0.3s;
+            text-align: center;
+        }
+        #timer {
+            font-size: 3.5em;
+            color: #e53935;
+            font-weight: 900;
+            margin-bottom: 36px;
+            letter-spacing: 2px;
+            text-shadow: 0 4px 18px rgba(231,76,60,0.10);
+            text-align: center;
+            line-height: 1.1;
+        }
+        button {
+            padding: 28px 90px;
+            font-size: 1.7em;
+            border: none;
+            border-radius: 40px;
+            background: linear-gradient(135deg, #1761a0 0%, #2986d9 60%, #6dd5fa 100%);
+            color: #fff;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 6px 24px rgba(52,152,219,0.22), 0 2px 12px rgba(0,0,0,0.10);
+            transition: background 0.2s, transform 0.15s;
+            outline: none;
+            display: block;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+        }
+        button::after {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; right: 0; bottom: 0;
+            background: linear-gradient(120deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.08) 60%, rgba(255,255,255,0.01) 100%);
+            pointer-events: none;
+            border-radius: 40px;
+        }
+        button:hover {
+            background: linear-gradient(90deg, #217dbb 0%, #38b6ff 100%);
+            transform: translateY(-2px) scale(1.04);
+        }
+        #container img[alt="LOGO"] {
+            width: 220px;
+            height: 220px;
+            margin-bottom: 60px;
+        }
+        @media (max-width: 600px) {
+            #container {
+                padding: 24px 6vw 18px 6vw;
+                max-width: 98vw;
+            }
+            h2 {
+                font-size: 1.2em;
+            }
+            #question {
+                font-size: 1em;
+                padding: 12px 6px;
+            }
+            button {
+                padding: 12px 0;
+                width: 100%;
+                font-size: 1em;
+            }
+            #container img[alt="LOGO"] {
+                width: 70px;
+                height: 70px;
+                margin-bottom: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <img src="logo.png" alt="LOGO" style="display:block;margin:0 auto 18px auto;width:220px;height:220px;object-fit:contain;">
+        <h2>新洲区行政审批局面试考试</h2>
+        <div id="question">请点击"抽题"开始</div>
+        <div id="timer"></div>
+        <button id="drawBtn">开始抽题</button>
+    </div>
+    <script>
+        const questions = [
+            '世界上最高的山峰是哪一座？',
+            '水的化学式是什么？',
+            '中国的首都在哪里？',
+            '太阳系中最大的行星是什么？',
+            '"鲁迅"是中国哪一时期的著名作家？',
+            '计算：15 × 7 = ?'
+        ];// 这里修改题目
+        let timer = null;
+        let timeLeft = 300; // 这里修改时间 5分钟 300秒
+        const questionDiv = document.getElementById('question');
+        const timerDiv = document.getElementById('timer');
+        const drawBtn = document.getElementById('drawBtn');
 
-    <body>
-        <main class="container">
-            <h1>Welcome to PakePlus</h1>
-            <form class="row" id="greet-form">
-                <input id="inputValue" placeholder="Enter a something..." />
-            </form>
-            <div class="resultBox">
-                <span>result: </span>
-                <span id="result"></span>
-            </div>
-            <div class="invokeBox">
-                <button id="openUrl">open_url_browser</button>
-                <button id="openUrlNew">open_url_new</button>
-                <button id="runCommand">run_command</button>
-                <button id="downloadFile">download_file</button>
-                <button id="getExeDir">get_exe_dir</button>
-                <button id="getEnvVar">get_env_var</button>
-                <button id="findPort">find_port</button>
-            </div>
-        </main>
-    </body>
-</html>
+        function startTimer() {
+            clearInterval(timer);
+            timeLeft = 300; // 这里修改时间 5分钟 300秒
+            timerDiv.textContent = formatTime(timeLeft);
+            timer = setInterval(() => {
+                timeLeft--;
+                timerDiv.textContent = formatTime(timeLeft);
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    timerDiv.textContent = '时间到！';
+                }
+            }, 1000);
+        }
+
+        function formatTime(sec) {
+            const m = String(Math.floor(sec / 60)).padStart(2, '0');
+            const s = String(sec % 60).padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        drawBtn.onclick = function() {
+            const idx = Math.floor(Math.random() * questions.length);
+            questionDiv.textContent = `第${idx + 1}题：` + questions[idx];
+            startTimer();
+        };
+    </script>
+</body>
+</html> 
