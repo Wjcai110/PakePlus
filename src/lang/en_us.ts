@@ -381,4 +381,7 @@ export default {
     inputCommandDesc: 'Add the following code to the script to run command',
     inputDownloadPath: 'Please enter download URL or select download folder',
     userAgentTips: 'Default system browser UA',
+    selectBuildMethod: 'Please select build method',
+    savePath: 'Save path',
+    savePathTips: 'Click to select, default to download directory',
 }
