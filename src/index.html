@@ -1,32 +1,212 @@
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <link rel="stylesheet" href="styles.css" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>PakePlus App</title>
-        <script type="module" src="/main.js" defer></script>
-    </head>
-
-    <body>
-        <main class="container">
-            <h1>Welcome to PakePlus</h1>
-            <form class="row" id="greet-form">
-                <input id="inputValue" placeholder="Enter a something..." />
-            </form>
-            <div class="resultBox">
-                <span>result: </span>
-                <span id="result"></span>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模板设计器</title>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="main-content">
+            <div class="toolbar">
+                <div class="tool-group">
+                    <button id="import-template">导入背景</button>
+                    <button id="import-template-config">导入模板配置</button>
+                    <button id="save-template">保存模板</button>
+                    <button id="add-field">添加字段</button>
+                    <button id="delete-field">删除字段</button>
+                </div>
+                <div class="tool-group">
+                    <button id="zoom-in">放大</button>
+                    <button id="zoom-out">缩小</button>
+                    <button id="import-data">导入数据</button>
+                    <button id="export-data">导出数据</button>
+                    <button id="print">打印</button>
+                    <button id="properties-toggle" class="properties-toggle">
+                        <span class="toggle-icon">☰</span>
+                        <span class="toggle-text">属性面板</span>
+                    </button>
+                </div>
             </div>
-            <div class="invokeBox">
-                <button id="openUrl">open_url_browser</button>
-                <button id="openUrlNew">open_url_new</button>
-                <button id="runCommand">run_command</button>
-                <button id="downloadFile">download_file</button>
-                <button id="getExeDir">get_exe_dir</button>
-                <button id="getEnvVar">get_env_var</button>
-                <button id="findPort">find_port</button>
+            
+            <div class="print-settings">
+                <!-- 打印设置已移至打印/预览弹窗 -->
             </div>
-        </main>
-    </body>
-</html>
+            
+            <div class="editor-container">
+                <div class="template-area">
+                    <div id="template-canvas" class="canvas">
+                        <!-- 模板内容将在这里显示 -->
+                        <div class="placeholder-message">请导入模板或创建新模板</div>
+                    </div>
+                </div>
+                
+                <div class="properties-panel">
+                    <h3>字段属性</h3>
+                    
+                    <!-- 基本信息部分 -->
+                    <div class="properties-section">
+                        <h4 class="properties-section-title">基本信息</h4>
+                        <div class="property-group">
+                            <label for="field-name">字段名称</label>
+                            <input type="text" id="field-name" placeholder="例如：姓名、地址、电话">
+                        </div>
+                        <div class="property-group">
+                            <label for="field-type">字段类型</label>
+                            <select id="field-type">
+                                <option value="text">文本</option>
+                                <option value="number">数字</option>
+                                <option value="date">日期</option>
+                                <option value="image">二维码</option>
+                            </select>
+                        </div>
+                        <div class="property-group">
+                            <label for="field-default-value">数据内容</label>
+                            <input type="text" id="field-default-value" placeholder="数据未导入时显示的默认内容">
+                        </div>
+                        
+                        <!-- 图片选择控件（当字段类型为图片时显示） -->
+                        <div id="image-field-container" class="property-group" style="display: none;">
+                            <label for="field-image-select">选择二维码</label>
+                            <input type="file" id="field-image-select" accept="image/*">
+                            <button id="browse-image-btn" class="small-btn">浏览...</button>
+                            <button id="copy-base64-btn" class="small-btn">复制Base64</button>           
+                        </div>
+                    </div>
+                    
+                    <!-- 位置信息部分 -->
+                    <div class="properties-section">
+                        <h4 class="properties-section-title">位置与尺寸</h4>
+                        <div class="coords-group">
+                            <div class="property-group">
+                                <label for="field-x">X坐标 (mm)</label>
+                                <input type="number" id="field-x" step="0.1" placeholder="0.0">
+                            </div>
+                            <div class="property-group">
+                                <label for="field-y">Y坐标 (mm)</label>
+                                <input type="number" id="field-y" step="0.1" placeholder="0.0">
+                            </div>
+                        </div>
+                        <div class="coords-group">
+                            <div class="property-group">
+                                <label for="field-width">宽度 (mm)</label>
+                                <input type="number" id="field-width" step="0.1" placeholder="25.0">
+                            </div>
+                            <div class="property-group">
+                                <label for="field-height">高度 (mm)</label>
+                                <input type="number" id="field-height" step="0.1" placeholder="3.0">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 字体样式部分 -->
+                    <div class="properties-section">
+                        <h4 class="properties-section-title">字体样式</h4>
+                        
+                        <!-- 字体大小 -->
+                        <div class="property-group">
+                            <label for="field-font-size">字体大小 (pt)</label>
+                            <input type="number" id="field-font-size" value="12" placeholder="12">
+                        </div>
+                        
+                        <!-- 字体 -->
+                        <div class="property-group">
+                            <label for="field-font-family">字体</label>
+                            <select id="field-font-family">
+                                <option value="SimSun">宋体</option>
+                                <option value="SimHei">黑体</option>
+                                <option value="KaiTi">楷体</option>
+                                <option value="Microsoft YaHei">微软雅黑</option>
+                                <option value="Arial">Arial</option>
+                                <option value="Times New Roman">Times New Roman</option>
+                                <option value="Courier New">Courier New</option>
+                                <option value="custom">自定义字体...</option>
+                            </select>
+                        </div>
+                        
+                        <!-- 自定义字体 -->
+                        <div class="property-group" id="custom-font-container" style="display:none;">
+                            <label for="field-custom-font">自定义字体名称</label>
+                            <input type="text" id="field-custom-font" placeholder="输入您系统中的字体名称">
+                        </div>
+                        
+                        <div class="property-group">
+                            <label>字体样式</label>
+                            <div class="style-options-container">
+                                <label class="checkbox-style-btn">
+                                    <input type="checkbox" id="field-font-bold" />
+                                    <span class="icon-bold">𝐁</span>
+                                </label>
+                                <label class="checkbox-style-btn">
+                                    <input type="checkbox" id="field-font-italic" />
+                                    <span class="icon-italic">𝐼</span>
+                                </label>
+                                <label class="checkbox-style-btn">
+                                    <input type="checkbox" id="field-font-underline" />
+                                    <span class="icon-underline">U̲</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button id="apply-properties">应用</button>
+                </div>
+                        
+                        <div id="data-modal" class="modal">
+                            <div class="modal-content">
+                                <span class="close">&times;</span>
+                                <h2>数据导入</h2>
+                                <div class="import-options">
+                                    <div class="file-upload">
+                                        <label for="file-input" class="custom-file-upload">
+                                            <i class="file-icon">📄</i> 选择Excel文件
+                                        </label>
+                                        <div class="file-input-container">
+                                            <input type="file" id="file-input" accept=".xlsx,.xls">
+                                            <span class="file-name">未选择任何文件</span>
+                                        </div>
+                                        <div id="file-preview" class="preview-area">
+                                            <p>选择文件后，Excel文件预览将显示在这里</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button id="confirm-data">确认导入</button>
+                            </div>
+                        </div>
+                        
+                        <div id="template-size-modal" class="modal">
+                            <div class="modal-content">
+                                <span class="close">&times;</span>
+                                <h2>设置模板尺寸</h2>
+                                <div class="property-group">
+                                    <label for="template-size-select">纸张尺寸</label>
+                                    <select id="template-size-select">
+                                        <option value="A3">A3（420 × 297mm）</option>
+                                        <option value="A4" selected>A4（297 × 210mm）</option>
+                                        <option value="A5">A5（210 × 148mm）</option>
+                                        <option value="B5">B5（250 × 176mm）</option>
+                                        <option value="custom">自定义</option>
+                                    </select>
+                                </div>
+                                <div class="property-group">
+                                    <label for="template-width">宽度</label>
+                                    <input type="number" id="template-width" value="297">
+                                    <span class="size-unit">mm</span>
+                                </div>
+                                <div class="property-group">
+                                    <label for="template-height">高度</label>
+                                    <input type="number" id="template-height" value="210">
+                                    <span class="size-unit">mm</span>
+                                </div>
+                                <div class="button-group">
+                                    <button id="confirm-size">确认</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <script src="script.js"></script>
+                </body>
+                </html>
