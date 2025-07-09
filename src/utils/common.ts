@@ -23,10 +23,11 @@ export const fileSizeLimit = import.meta.env.VITE_FILE_LIMIT_SIZE * 1024 * 1024
 export const fileLimitNumber = import.meta.env.VITE_FILE_LIMIT_NUMBER
 
 // pay info
-export const basePAYJSURL = import.meta.env.VITE_PAYJS_DOMAIN
+export const ppApisDomain = import.meta.env.VITE_PPAPI_DOMAIN
+export const basePayjsUrl = import.meta.env.VITE_PAYJS_DOMAIN
 export const payJsMchid = import.meta.env.VITE_PAYJS_MCHID
 export const payJsSignKey = import.meta.env.VITE_PAYJS_SIGN_KEY
-export const baseYUNPAYURL = import.meta.env.VITE_YUNPAY_DOMAIN
+export const baseYunPayUrl = import.meta.env.VITE_YUNPAY_DOMAIN
 export const yunPayMchid = import.meta.env.VITE_YUNPAY_MCHID
 export const yunPaySignKey = import.meta.env.VITE_YUNPAY_SIGN_KEY
 export const rhExeUrl = import.meta.env.VITE_LOCAL_RHEXE
@@ -286,12 +287,12 @@ export const readDirRecursively = async (path: string): Promise<string[]> => {
     return fileList
 }
 
-// 是否为开发环境
+// is dev
 export const isDev = import.meta.env.DEV
 
 export const buildTime = import.meta.env.BUILD_TIME
 
-// 是否为tauri环境
+// is tauri
 export const isTauri = (window as any).__TAURI__ ? true : false
 
 // open url or file or path
@@ -302,11 +303,11 @@ export const openUrl = async (url: string) => {
     } else if (url) {
         window.open(url, '_blank')
     } else {
-        ElMessage.error('URL或文件路径不能为空')
+        ElMessage.error('URL or file path cannot be empty')
     }
 }
 
-// 是否为字母数字
+// is alphanumeric
 export const isAlphanumeric = (str: string) => {
     const regex = /^[a-zA-Z0-9]+$/
     return regex.test(str)

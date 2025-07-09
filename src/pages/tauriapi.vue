@@ -645,6 +645,7 @@
                     <el-button @click="getPayJsCode('alipay')">
                         paypal
                     </el-button>
+                    <el-button @click="getPpApis"> ppapis </el-button>
                 </div>
                 <!-- plugin-os api -->
                 <div v-else-if="menuIndex === '2-14'" class="cardContent">
@@ -979,6 +980,24 @@
                         <el-tooltip content="auto operation" placement="bottom">
                             <el-button>{{ t('autoOperation') }}</el-button>
                         </el-tooltip>
+                        <el-tooltip
+                            content="disable right click"
+                            placement="bottom"
+                        >
+                            <el-button>全局禁止右键</el-button>
+                        </el-tooltip>
+                        <el-tooltip
+                            content="allow some right click"
+                            placement="bottom"
+                        >
+                            <el-button>允许部分右键</el-button>
+                        </el-tooltip>
+                        <el-tooltip
+                            content="enable right click"
+                            placement="bottom"
+                        >
+                            <el-button>允许右键</el-button>
+                        </el-tooltip>
                     </div>
                     <div class="codeDemo">
                         <h2>{{ t('removeWebElement') }}</h2>
@@ -1039,12 +1058,12 @@
                     <div class="cardBox">
                         <el-tooltip content="open debug" placement="bottom">
                             <el-button @click="debugHandler('open')">
-                                开启调试
+                                {{ t('openDebug') }}
                             </el-button>
                         </el-tooltip>
                         <el-tooltip content="close debug" placement="bottom">
                             <el-button @click="debugHandler('close')">
-                                关闭调试
+                                {{ t('closeDebug') }}
                             </el-button>
                         </el-tooltip>
                     </div>
@@ -1146,8 +1165,8 @@ import Codes from '@/utils/codes'
 import {
     arrayBufferToBase64,
     base64PngToIco,
-    basePAYJSURL,
-    baseYUNPAYURL,
+    basePayjsUrl,
+    baseYunPayUrl,
     getPaySign,
     oneMessage,
     openSelect,
@@ -1561,12 +1580,23 @@ const getPayJsCode = async (payMathod: string = 'weixin') => {
                 `${encodeURIComponent(key)}=${encodeURIComponent(order[key])}`
         )
         .join('&')
-    const payUrl = basePAYJSURL + '/api/cashier?' + queryString
+    const payUrl = basePayjsUrl + '/api/cashier?' + queryString
     console.log('payUrl', payUrl)
     const url = await QRCode.toDataURL(payUrl)
     console.log('url', url)
     dialogVisible.value = true
     qrCodeData.value = url
+}
+
+// get ppapi json
+const getPpApis = async () => {
+    const response = await payApi.getPpApis()
+    console.log('response----', response)
+    if (response.status === 200) {
+        console.log('data----', response.data)
+    } else {
+        oneMessage.error(t('getPpApisError'))
+    }
 }
 
 // get yun pay code
@@ -1639,18 +1669,18 @@ const getZPayCode = async (payMathod: string = 'alipay') => {
     order.sign = getPaySign(order, zPaySignKey)
     console.log('order----', order)
     // formData post
-    // const formData = new FormData()
-    // formData.append('pid', zPayMchId)
-    // formData.append('type', payMathod)
-    // formData.append('out_trade_no', payOrderNo.value)
-    // formData.append('notify_url', 'https://juejin.cn/')
-    // formData.append('name', 'VIP会员')
-    // formData.append('money', money.toString())
-    // formData.append('clientip', '192.168.1.100')
-    // formData.append('sign_type', 'MD5')
-    // formData.append('sign', getPaySign(formData, zPaySignKey))
-    // const response: any = await payApi.getZPayCode2(formData)
-    const response: any = await payApi.getZPayCode(order)
+    const formData = new FormData()
+    formData.append('pid', zPayMchId)
+    formData.append('type', payMathod)
+    formData.append('out_trade_no', payOrderNo.value)
+    formData.append('notify_url', 'https://juejin.cn/')
+    formData.append('name', 'VIP会员')
+    formData.append('money', money.toString())
+    formData.append('clientip', '192.168.1.100')
+    formData.append('sign_type', 'MD5')
+    formData.append('sign', getPaySign(formData, zPaySignKey))
+    const response: any = await payApi.getZPayCode2(formData)
+    // const response: any = await payApi.getZPayCode(order)
     console.log('response----', response)
     if (response.status === 200 && response.data.code === 1) {
         dialogVisible.value = true
